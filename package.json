@@ -1,11 +1,11 @@
 {
   "name": "block-router",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/mohdmusthafa/block-router"
   },
-  "homepage": "https://github.com/mohdmusthafa/block-router/README.md",
+  "homepage": "https://github.com/mohdmusthafa/block-router#readme",
   "description": "Block router like express router for appblocks function blocks",
   "main": "index.js",
   "scripts": {
