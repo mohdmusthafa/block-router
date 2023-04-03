@@ -1,3 +1,5 @@
+const { readdirSync } = require("fs");
+
 class BlockRouter {
   routerMap = new Map();
   middlewares = [];
@@ -24,6 +26,14 @@ class BlockRouter {
     const deleteMethods = this.routerMap.get("DELETE") || new Map();
     deleteMethods.set(path, controller);
     this.routerMap.set("DELETE", deleteMethods);
+  }
+  static(rootPath){
+    const files = readdirSync(rootPath);
+    for (const file of files) {
+      this.get(`/${file}`, (req, res) => {
+        res.sendFile(file, { root: rootPath })
+      })
+    }
   }
   route(req, res) {
     this.req = req;
