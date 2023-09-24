@@ -1,38 +1,51 @@
-const { readdirSync } = require("fs");
-
+import { readdirSync } from "fs";
+import { includeMiddleware } from "./middlewares/index.js";
 class BlockRouter {
   routerMap = new Map();
-  middlewares = [];
+  middlewareMap = new Map();
 
-  use(middleware) {
-    this.middlewares.push(middleware);
+  configureMiddleware(key, controller) {
+    this.middlewareMap.set(key, controller);
   }
-  get(path, controller) {
+
+  get(path, controller, middlewareKeys = []) {
     const getMethods = this.routerMap.get("GET") || new Map();
-    getMethods.set(path, controller);
+    const middlewares = middlewareKeys.map((middlewareKey) =>
+      this.middlewareMap.get(middlewareKey)
+    );
+    getMethods.set(path, includeMiddleware(controller, middlewares));
     this.routerMap.set("GET", getMethods);
   }
-  post(path, controller) {
+  post(path, controller, middlewareKeys = []) {
     const postMethods = this.routerMap.get("POST") || new Map();
-    postMethods.set(path, controller);
+    const middlewares = middlewareKeys.map((middlewareKey) =>
+      this.middlewareMap.get(middlewareKey)
+    );
+    postMethods.set(path, includeMiddleware(controller, middlewares));
     this.routerMap.set("POST", postMethods);
   }
-  put(path, controller) {
+  put(path, controller, middlewareKeys = []) {
     const putMethods = this.routerMap.get("PUT") || new Map();
-    putMethods.set(path, controller);
+    const middlewares = middlewareKeys.map((middlewareKey) =>
+      this.middlewareMap.get(middlewareKey)
+    );
+    putMethods.set(path, includeMiddleware(controller, middlewares));
     this.routerMap.set("PUT", putMethods);
   }
-  delete(path, controller) {
+  delete(path, controller, middlewareKeys = []) {
     const deleteMethods = this.routerMap.get("DELETE") || new Map();
-    deleteMethods.set(path, controller);
+    const middlewares = middlewareKeys.map((middlewareKey) =>
+      this.middlewareMap.get(middlewareKey)
+    );
+    deleteMethods.set(path, includeMiddleware(controller, middlewares));
     this.routerMap.set("DELETE", deleteMethods);
   }
-  static(rootPath){
+  static(rootPath) {
     const files = readdirSync(rootPath);
     for (const file of files) {
       this.get(`/${file}`, (req, res) => {
-        res.sendFile(file, { root: rootPath })
-      })
+        res.sendFile(file, { root: rootPath });
+      });
     }
   }
   route(req, res) {
@@ -54,12 +67,9 @@ class BlockRouter {
       this.res.send("No function definition available for this route");
       return;
     }
-    //apply middlewares;
-    this.middlewares.forEach((middleware) => {
-      middleware(this.req, this.res);
-    });
+
     handlerFn(this.req, this.res);
   }
 }
 
-module.exports = BlockRouter;
+export default BlockRouter;
